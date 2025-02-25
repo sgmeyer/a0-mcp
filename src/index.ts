@@ -1,9 +1,9 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
-import { ManagementClient } from 'auth0';
+import { ManagementClient } from "auth0";
 
-import { tenantLogGetAllSchema } from './shared/schemas.js';
+import { tenantLogGetSchema, tenantLogGetAllSchema } from "./shared/schemas.js";
 
 
 const auth0 = new ManagementClient({
@@ -19,12 +19,32 @@ const server = new McpServer({
 });
 
 server.tool(
-  "get-tenant-logs",
-  "Fetches the Tenant Logs",
+  "log-get-by-id",
+  "Retrieve an individual log event by id.",
+  tenantLogGetSchema,
+  async (args: any) => {
+    const log = await auth0.logs.get(args);
+
+    if(log) {
+      return { content: [{ type: "text", text: JSON.stringify(log) }] };
+    } else {
+      return { content: [{ type: "text", text: "No log found with this ID." }] };
+    }
+  }
+);
+
+// TODO: We need to help the LLM know more about the TLog schemas.  The LLM struggles to filter on schemas if you don't specify exactly the info in the prompt.
+server.tool(
+  "log-get-all",
+  "Retrieves the Tenant Logs based on the provided search criteria.",
   tenantLogGetAllSchema,
   async (args: any) => {
     const logs = await auth0.logs.getAll(args);
-    return { content: [{ type: "text", text: JSON.stringify(logs) }] };
+    if(logs.data.length > 0) {
+      return { content: [{ type: "text", text: JSON.stringify(logs) }] };
+    } else {
+      return { content: [{ type: "text", text: "No logs found." }] };
+    }
   }
 );
 

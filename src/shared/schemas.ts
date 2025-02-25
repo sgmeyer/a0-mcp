@@ -1,5 +1,9 @@
 import { z } from 'zod';
 
+export const tenantLogGetSchema = {
+  id: z.string().nonempty().describe("The ID of the log event to retrieve.")
+};
+
 export const tenantLogGetAllSchema = {
   page: z.number().optional().describe("Page index of the results to return. First page is 0."), 
   per_page: z.number().optional().describe("Number of results per page. Paging is disabled if parameter not sent. Default: <code>50</code>. Max value: <code>100</code>"),

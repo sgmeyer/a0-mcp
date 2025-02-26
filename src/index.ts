@@ -4,6 +4,7 @@ import { z } from "zod";
 import { ManagementClient } from "auth0";
 
 import { clientCreateParameters, clientDeleteParameters, clientGetParameters, clientGetAllParameters,
+        formsGetAllParameters,
          tenantLogGetParameters, tenantLogGetAllParameters } from "./shared/parameters.js";
 
 
@@ -13,7 +14,6 @@ const auth0 = new ManagementClient({
   clientSecret: process.env.AUTH0_CLIENT_SECRET || ""
 });
 
-// Create server instance
 const server = new McpServer({
   name: "auth0-mcp-server",
   version: "0.0.1",
@@ -70,7 +70,17 @@ server.tool(
       return { content: [{ type: "text", text: `Error: ${(error as Error).message}` }] };
     }
   }
-)
+);
+
+server.tool(
+  "forms-get-all",
+  "Retrieve all forms.",
+  formsGetAllParameters,
+  async (args: any) => {
+    const forms = await auth0.forms.getAll(args); 
+    return { content: [{ type: "text", text: JSON.stringify(forms) }] };
+  }
+);
 
 server.tool(
   "log-get-by-id",

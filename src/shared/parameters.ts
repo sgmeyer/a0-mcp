@@ -70,6 +70,13 @@ export const clientGetAllParameters = {
   q: z.string().optional().describe("Advanced Query in <a href='http://www.lucenetutorial.com/lucene-query-syntax.html'>Lucene</a> syntax.<br /><b>Permitted Queries</b>:<br /><ul><li><i>client_grant.organization_id:{organization_id}</i></li><li><i>client_grant.allow_any_organization:true</i></li></ul><b>Additional Restrictions</b>:<br /><ul><li>Cannot be used in combination with other filters</li><li>Requires use of the <i>from</i> and <i>take</i> paging parameters (checkpoint paginatinon)</li><li>Reduced rate limits apply. See <a href='https://auth0.com/docs/troubleshoot/customer-support/operational-policies/rate-limit-policy/rate-limit-configurations/enterprise-public'>Rate Limit Configurations</a></li></ul><i><b>Note</b>: Recent updates may not be immediately reflected in query results</i>")
 };
 
+export const formsGetAllParameters = {
+  page: z.number().optional().describe("Page index of the results to return. First page is 0."),
+  per_page: z.number().optional().describe("Number of results per page. Defaults to 50."),
+  include_totals: z.boolean().optional().describe("Return results inside an object that contains the total result count (true) or as a direct array of results (false, default)."),
+  hydrate: z.array(z.enum(["flow_count", "links"])).optional().describe("Hydration param"),
+}
+
 export const tenantLogGetParameters = {
   id: z.string().nonempty().describe("The ID of the log event to retrieve.")
 };

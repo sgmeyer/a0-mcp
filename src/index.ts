@@ -3,7 +3,8 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 import { ManagementClient } from "auth0";
 
-import { tenantLogGetSchema, tenantLogGetAllSchema } from "./shared/schemas.js";
+import { clientCreateParameters, clientDeleteParameters, clientGetParameters, clientGetAllParameters,
+         tenantLogGetParameters, tenantLogGetAllParameters } from "./shared/parameters.js";
 
 
 const auth0 = new ManagementClient({
@@ -19,9 +20,62 @@ const server = new McpServer({
 });
 
 server.tool(
+  "clients-create",
+  "",
+  clientCreateParameters,
+  async (args: any) => {
+    const client = await auth0.clients.create(args);
+    return { content: [{ type: "text", text: JSON.stringify(client) }] };
+  }
+)
+
+server.tool(
+  "clients-delete",
+  "Delete a client by id.",
+  clientDeleteParameters,
+  async (args: any) => {
+    const client = await auth0.clients.delete(args);
+    if(client) {
+      return { content: [{ type: "text", text: "Client deleted successfully." }] };
+    } else {
+      return { content: [{ type: "text", text: "No client found with this ID." }] };
+    }
+  }
+);
+
+server.tool(
+  "clients-get-by-id",
+  "Retrieve an individual client by id.",
+  clientGetParameters,
+  async (args: any) => {
+    console.log("Arguments: ", args);
+    const client = await auth0.clients.get(args); 
+    if(client){
+      return { content: [{ type: "text", text: JSON.stringify(client) }] };
+    } else {  
+      return { content: [{ type: "text", text: "No client found with this ID." }] };
+    }
+  }
+);
+
+server.tool(
+  "clients-get-all",
+  "Retrieve all clients.",
+  clientGetAllParameters,
+  async (args: any) => {
+    try {
+      const clients = await auth0.clients.getAll(args);
+      return { content: [{ type: "text", text: JSON.stringify(clients) }] };
+    } catch (error) {
+      return { content: [{ type: "text", text: `Error: ${(error as Error).message}` }] };
+    }
+  }
+)
+
+server.tool(
   "log-get-by-id",
   "Retrieve an individual log event by id.",
-  tenantLogGetSchema,
+  tenantLogGetParameters,
   async (args: any) => {
     const log = await auth0.logs.get(args);
 
@@ -37,7 +91,7 @@ server.tool(
 server.tool(
   "log-get-all",
   "Retrieves the Tenant Logs based on the provided search criteria.",
-  tenantLogGetAllSchema,
+  tenantLogGetAllParameters,
   async (args: any) => {
     const logs = await auth0.logs.getAll(args);
     if(logs.data.length > 0) {
@@ -48,6 +102,8 @@ server.tool(
   }
 );
 
+
+///////-------------- NEEDS refactoring to new structure /////////
 server.tool(
   "find-user-by-email",
   "Find a user for a given email",
@@ -178,20 +234,6 @@ server.tool(
     try {
       await auth0.users.deleteRoles({ id: userId }, { roles });
       return { content: [{ type: "text", text: "Roles removed successfully." }] };
-    } catch (error) {
-      return { content: [{ type: "text", text: `Error: ${(error as Error).message}` }] };
-    }
-  }
-);
-
-server.tool(
-  "get-user-logs",
-  "Retrieve login history and event logs for a user",
-  { userId: z.string(), per_page: z.number().default(10) },
-  async ({ userId, per_page }) => {
-    try {
-      const logs = await auth0.users.getLogs({ id: userId, per_page });
-      return { content: [{ type: "text", text: JSON.stringify(logs) }] };
     } catch (error) {
       return { content: [{ type: "text", text: `Error: ${(error as Error).message}` }] };
     }

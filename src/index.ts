@@ -4,7 +4,7 @@ import { z } from "zod";
 import { ManagementClient } from "auth0";
 
 import { clientCreateParameters, clientDeleteParameters, clientGetParameters, clientGetAllParameters,
-        formsGetAllParameters,
+         formsCreateParameters, formsGetAllParameters,
          tenantLogGetParameters, tenantLogGetAllParameters } from "./shared/parameters.js";
 
 
@@ -69,6 +69,16 @@ server.tool(
     } catch (error) {
       return { content: [{ type: "text", text: `Error: ${(error as Error).message}` }] };
     }
+  }
+);
+
+server.tool(
+  "forms-create-all",
+  "Create a new form.",
+  formsCreateParameters,
+  async (args: any) => {
+    const form = await auth0.forms.create(args);
+    return { content: [{ type: "text", text: JSON.stringify(form) }] };
   }
 );
 

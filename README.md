@@ -62,7 +62,7 @@ This project can be used with Claude Deskop.  To configure Claude Desktop you mu
     "auth0": {
       "command": "node",
       "args": [
-        "/Users/shawn.meyer/Repos/a0-mcp/dist/index.js"
+        "/path/to/repo/a0-mcp/dist/index.js"
       ],
       "env": {
         "AUTH0_DOMAIN": "<auth0-domain>",
